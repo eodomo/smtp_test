@@ -1,3 +1,4 @@
+/*
 use std::io;
 
 use lettre::Message;
@@ -16,3 +17,4 @@ pub fn gather_email_information() {
         .read_line(&mut from)
         .expect("Failed to read email address");
 }
+*/
