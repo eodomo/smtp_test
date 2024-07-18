@@ -2,7 +2,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     use lettre::{Message, SmtpTransport, Transport};
 
     let email = Message::builder()
-        .from("<gerarda@charlesit.com>".parse()?)
+        .from("<erico@charlesit.com>".parse()?)
         .reply_to("<erico@charlesit.com>".parse()?)
         .to("<eric@olerud.com>".parse()?)
         .subject("This is a test email")
