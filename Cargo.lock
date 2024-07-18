@@ -527,7 +527,6 @@ name = "smtp_test"
 version = "0.1.0"
 dependencies = [
  "lettre",
- "tokio",
 ]
 
 [[package]]
