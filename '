@@ -1,4 +1,4 @@
-use lettre::{Message, SmtpTransport, Transport};
+use lettre::{Mailbox, Message, SmtpTransport, Transport};
 use std::io;
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -9,18 +9,14 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut body = String::new();
 
     // Gather user info
-    println!("From: ");
+    println!("From: \n");
     io::stdin().read_line(&mut from)?;
     add_arrow_brackets(&from);
-    println!("Reply To: ");
     io::stdin().read_line(&mut reply_to)?;
     add_arrow_brackets(&reply_to);
-    println!("To: ");
     io::stdin().read_line(&mut to)?;
     add_arrow_brackets(&to);
-    println!("Subject: ");
     io::stdin().read_line(&mut subject)?;
-    println!("Body: ");
     io::stdin().read_line(&mut body)?;
 
     println!("From: {from}");
@@ -30,13 +26,11 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     println!("Body: {body}");
 
     let email = Message::builder()
-        .from(from.parse()?)
+        .from(Mailbox::n)
         .reply_to(reply_to.parse()?)
         .to(to.parse()?)
         .subject(subject)
-        .body(body)?;
-
-    dbg!(&email);
+        .body(body);
 
     // Create TLS transport on port 25
     let sender = SmtpTransport::builder_dangerous("olerud-com.mail.protection.outlook.com").build();
