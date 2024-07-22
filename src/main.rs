@@ -11,13 +11,13 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Gather user info
     println!("From: ");
     io::stdin().read_line(&mut from)?;
-    add_arrow_brackets(&from);
+    from = add_arrow_brackets(&from);
     println!("Reply To: ");
     io::stdin().read_line(&mut reply_to)?;
-    add_arrow_brackets(&reply_to);
+    reply_to = add_arrow_brackets(&reply_to);
     println!("To: ");
     io::stdin().read_line(&mut to)?;
-    add_arrow_brackets(&to);
+    to = add_arrow_brackets(&to);
     println!("Subject: ");
     io::stdin().read_line(&mut subject)?;
     println!("Body: ");
@@ -51,5 +51,5 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 }
 
 fn add_arrow_brackets(email_address: &str) -> String {
-    format!("<{email_address}>")
+    format!("<{}>", email_address.trim())
 }
