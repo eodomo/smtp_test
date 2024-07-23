@@ -1,7 +1,13 @@
 use lettre::{Message, SmtpTransport, Transport};
+use rustdns::{Resolver, ResolverConfig, ResolverOpts};
 use std::io;
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let resolver = Resolver::new();
+
+    let mx_response = resolver.mx_lookup("olerud.com");
+    dbg!(&mx_response)
+
     let mut from = String::new();
     let mut reply_to = String::new();
     let mut to = String::new();
