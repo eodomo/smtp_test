@@ -23,12 +23,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     println!("Body: ");
     io::stdin().read_line(&mut body)?;
 
-    println!("From: {from}");
-    println!("Reply to: {reply_to}");
-    println!("To: {to}");
-    println!("Subject: {subject}");
-    println!("Body: {body}");
-
     let email = Message::builder()
         .from(from.parse()?)
         .reply_to(reply_to.parse()?)
@@ -40,6 +34,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     // Create TLS transport on port 25
     let sender = SmtpTransport::builder_dangerous("olerud-com.mail.protection.outlook.com").build();
+    dbg!(&sender);
 
     // Send the email via remote relay
     let result = sender.send(&email);
