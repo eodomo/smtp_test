@@ -1,12 +1,11 @@
 use lettre::{Message, SmtpTransport, Transport};
-use rustdns::{Resolver, ResolverConfig, ResolverOpts};
 use std::io;
+use trust_dns_resolver::{config::*, lookup_ip::LookupIp, Resolver};
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let resolver = Resolver::new();
+    let email_server = String::from("olerud.com");
 
-    let mx_response = resolver.mx_lookup("olerud.com");
-    dbg!(&mx_response)
+    let mx_server = get_mx_address(&email_server);
 
     let mut from = String::new();
     let mut reply_to = String::new();
@@ -53,4 +52,28 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
 fn add_arrow_brackets(email_address: &str) -> String {
     format!("<{}>", email_address.trim())
+}
+
+fn get_mx_address(host: &str) -> Result<&LookupIp, Err()> {
+    let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+    let mx_response = resolver.mx_lookup(&email_server);
+    match mx_response {
+        Err(_) => println!("MX address not found for {email_server}"),
+        Ok(mx_response) => {
+            let records = mx_response.iter();
+            for record in records {
+                println!("{} {}", record.preference(), record.exchange());
+                let lookup_response = resolver.lookup_ip(record.exchange().to_string().as_str());
+                match lookup_response {
+                    Err(_) => println!("This exchange host has no address."),
+                    Ok(lookup_address) => {
+                        let ip_addrs = lookup_response.iter();
+                        for ip_addr in ip_addrs {
+                            return ip_addr;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
