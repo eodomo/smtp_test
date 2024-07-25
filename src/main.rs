@@ -1,3 +1,4 @@
+use email_address_parser::EmailAddress;
 use lettre::{Message, SmtpTransport, Transport};
 use std::io;
 use trust_dns_resolver::{config::*, lookup_ip::LookupIp, Resolver};
@@ -23,6 +24,9 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     io::stdin().read_line(&mut subject)?;
     println!("Body: ");
     io::stdin().read_line(&mut body)?;
+
+    let sender_email_address = EmailAddress::parse(&from, None).unwrap();
+    let sender_domain = sender_email_address.get_domain();
 
     let email = Message::builder()
         .from(from.parse()?)
@@ -52,9 +56,9 @@ fn add_arrow_brackets(email_address: &str) -> String {
 
 fn get_mx_address(host: &str) -> Result<&LookupIp, Err()> {
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-    let mx_response = resolver.mx_lookup(&email_server);
+    let mx_response = resolver.mx_lookup(&host);
     match mx_response {
-        Err(_) => println!("MX address not found for {email_server}"),
+        Err(_) => println!("MX address not found for {}", &host),
         Ok(mx_response) => {
             let records = mx_response.iter();
             for record in records {
