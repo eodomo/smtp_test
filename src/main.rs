@@ -1,7 +1,9 @@
+use core::panic;
 use email_address_parser::EmailAddress;
 use lettre::{Message, SmtpTransport, Transport};
 use std::io;
-use trust_dns_resolver::{config::*, lookup_ip::LookupIp, Resolver};
+use std::net::IpAddr;
+use trust_dns_resolver::{config::*, Resolver};
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut from = String::new();
@@ -27,6 +29,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     let sender_email_address = EmailAddress::parse(&from, None).unwrap();
     let sender_domain = sender_email_address.get_domain();
+    let sender_mx = get_mx_address(sender_domain);
 
     let email = Message::builder()
         .from(from.parse()?)
@@ -38,7 +41,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     dbg!(&email);
 
     // Create TLS transport on port 25
-    let sender = SmtpTransport::builder_dangerous("olerud-com.mail.protection.outlook.com").build();
+    let sender = SmtpTransport::builder_dangerous(sender_mx).build();
     dbg!(&sender);
 
     // Send the email via remote relay
@@ -54,11 +57,11 @@ fn add_arrow_brackets(email_address: &str) -> String {
     format!("<{}>", email_address.trim())
 }
 
-fn get_mx_address(host: &str) -> Result<&LookupIp, Err()> {
+fn get_mx_address(host: &str) -> Result<IpAddr, io::Error> {
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-    let mx_response = resolver.mx_lookup(&host);
+    let mx_response = resolver.mx_lookup(host.clone());
     match mx_response {
-        Err(_) => println!("MX address not found for {}", &host),
+        Err(_) => panic!("MX address not found for {}", host),
         Ok(mx_response) => {
             let records = mx_response.iter();
             for record in records {
@@ -67,13 +70,14 @@ fn get_mx_address(host: &str) -> Result<&LookupIp, Err()> {
                 match lookup_response {
                     Err(_) => println!("This exchange host has no address."),
                     Ok(lookup_address) => {
-                        let ip_addrs = lookup_response.iter();
+                        let ip_addrs = lookup_address.iter();
                         for ip_addr in ip_addrs {
-                            return ip_addr;
+                            return Ok(ip_addr);
                         }
                     }
                 }
             }
         }
     }
+    panic!("get_mx_addr match did not complete");
 }
