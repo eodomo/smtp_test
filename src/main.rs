@@ -2,8 +2,7 @@ use core::panic;
 use email_address_parser::EmailAddress;
 use lettre::{Message, SmtpTransport, Transport};
 use std::io;
-use std::net::IpAddr;
-use trust_dns_resolver::{config::*, Resolver};
+use trust_dns_resolver::{config::*, Name, Resolver};
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut from = String::new();
@@ -29,7 +28,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     let sender_email_address = EmailAddress::parse(&from, None).unwrap();
     let sender_domain = sender_email_address.get_domain();
-    let sender_mx = get_mx_address(sender_domain);
+    let sender_mx = get_mx_address(sender_domain).unwrap().to_utf8();
 
     let email = Message::builder()
         .from(from.parse()?)
@@ -57,7 +56,7 @@ fn add_arrow_brackets(email_address: &str) -> String {
     format!("<{}>", email_address.trim())
 }
 
-fn get_mx_address(host: &str) -> Result<IpAddr, io::Error> {
+fn get_mx_address(host: &str) -> Result<&Name, io::Error> {
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
     let mx_response = resolver.mx_lookup(host.clone());
     match mx_response {
@@ -66,16 +65,7 @@ fn get_mx_address(host: &str) -> Result<IpAddr, io::Error> {
             let records = mx_response.iter();
             for record in records {
                 println!("{} {}", record.preference(), record.exchange());
-                let lookup_response = resolver.lookup_ip(record.exchange().to_string().as_str());
-                match lookup_response {
-                    Err(_) => println!("This exchange host has no address."),
-                    Ok(lookup_address) => {
-                        let ip_addrs = lookup_address.iter();
-                        for ip_addr in ip_addrs {
-                            return Ok(ip_addr);
-                        }
-                    }
-                }
+                return Ok(record.exchange());
             }
         }
     }
