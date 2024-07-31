@@ -14,21 +14,24 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Gather user info
     println!("From: ");
     io::stdin().read_line(&mut from)?;
-    from = add_arrow_brackets(&from);
     println!("Reply To: ");
     io::stdin().read_line(&mut reply_to)?;
-    reply_to = add_arrow_brackets(&reply_to);
     println!("To: ");
     io::stdin().read_line(&mut to)?;
-    to = add_arrow_brackets(&to);
     println!("Subject: ");
     io::stdin().read_line(&mut subject)?;
     println!("Body: ");
     io::stdin().read_line(&mut body)?;
 
-    let sender_email_address = EmailAddress::parse(&from, None).unwrap();
+    dbg!(&from);
+
+    let sender_email_address = EmailAddress::parse(&from.trim(), None).unwrap();
     let sender_domain = sender_email_address.get_domain();
     let sender_mx = get_mx_address(sender_domain).unwrap().to_utf8();
+
+    from = add_arrow_brackets(&from);
+    reply_to = add_arrow_brackets(&reply_to);
+    to = add_arrow_brackets(&to);
 
     let email = Message::builder()
         .from(from.parse()?)
