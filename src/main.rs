@@ -23,8 +23,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     println!("Body: ");
     io::stdin().read_line(&mut body)?;
 
-    dbg!(&from);
-
     let sender_email_address = EmailAddress::parse(&from.trim(), None).unwrap();
     let sender_domain = sender_email_address.get_domain();
     let sender_mx = get_mx_address(sender_domain).unwrap().to_utf8();
@@ -39,8 +37,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .to(to.parse()?)
         .subject(subject)
         .body(body)?;
-
-    dbg!(&email);
 
     // Create TLS transport on port 25
     let sender = SmtpTransport::builder_dangerous(sender_mx).build();
