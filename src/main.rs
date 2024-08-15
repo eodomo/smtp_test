@@ -1,7 +1,7 @@
 use email_address_parser::EmailAddress;
 use lettre::{Message, SmtpTransport, Transport};
 use smtp_test::*;
-use std::io;
+use std::{io, io::Write};
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut from = String::new();
@@ -11,15 +11,20 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut body = String::new();
 
     // Gather user info
-    println!("From: ");
+    print!("From: ");
+    io::stdout().flush().unwrap();
     io::stdin().read_line(&mut from)?;
-    println!("Reply To: ");
+    print!("Reply To: ");
+    io::stdout().flush().unwrap();
     io::stdin().read_line(&mut reply_to)?;
-    println!("To: ");
+    print!("To: ");
+    io::stdout().flush().unwrap();
     io::stdin().read_line(&mut to)?;
-    println!("Subject: ");
+    print!("Subject: ");
+    io::stdout().flush().unwrap();
     io::stdin().read_line(&mut subject)?;
-    println!("Body: ");
+    print!("Body: ");
+    io::stdout().flush().unwrap();
     io::stdin().read_line(&mut body)?;
 
     let sender_email_address = EmailAddress::parse(&from.trim(), None).unwrap();
