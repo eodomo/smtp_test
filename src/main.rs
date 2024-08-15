@@ -1,8 +1,7 @@
-use core::panic;
 use email_address_parser::EmailAddress;
 use lettre::{Message, SmtpTransport, Transport};
+use smtp_test::*;
 use std::io;
-use trust_dns_resolver::{config::*, Name, Resolver};
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut from = String::new();
@@ -40,33 +39,13 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     // Create TLS transport on port 25
     let sender = SmtpTransport::builder_dangerous(sender_mx).build();
-    dbg!(&sender);
+    //dbg!(&sender);
 
     // Send the email via remote relay
     let result = sender.send(&email);
-    dbg!(&result);
+    //dbg!(&result);
     println!("{:?}", result);
     assert!(result.is_ok());
 
     Ok(())
-}
-
-fn add_arrow_brackets(email_address: &str) -> String {
-    format!("<{}>", email_address.trim())
-}
-
-fn get_mx_address(host: &str) -> Result<Name, io::Error> {
-    let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
-    let mx_response = resolver.mx_lookup(host);
-    match mx_response {
-        Err(_) => panic!("MX address not found for {}", host),
-        Ok(mx_response) => {
-            let records = mx_response.iter();
-            for record in records {
-                println!("{} {}", record.preference(), record.exchange());
-                return Ok(record.exchange().clone());
-            }
-        }
-    }
-    panic!("get_mx_addr match did not complete");
 }
