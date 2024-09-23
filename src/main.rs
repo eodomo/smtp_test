@@ -1,9 +1,26 @@
+use clap::Parser;
 use email_address_parser::EmailAddress;
 use lettre::{Message, SmtpTransport, Transport};
 use smtp_test::*;
 use std::{io, io::Write};
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    from: String,
+    #[arg(short, long)]
+    reply_to: String,
+    #[arg(short, long)]
+    to: String,
+    #[arg(short, long)]
+    subject: String,
+    #[arg(short, long)]
+    body: String,
+}
+
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let args = Args::parse();
     let mut from = String::new();
     let mut reply_to = String::new();
     let mut to = String::new();
