@@ -8,29 +8,32 @@ use std::{io, io::Write};
 #[command(version, about, long_about = None)]
 struct Args {
     #[arg(short, long)]
-    from: String,
+    from: Option<String>,
     #[arg(short, long)]
-    reply_to: String,
+    reply_to: Option<String>,
     #[arg(short, long)]
-    to: String,
+    to: Option<String>,
     #[arg(short, long)]
-    subject: String,
+    subject: Option<String>,
     #[arg(short, long)]
-    body: String,
+    body: Option<String>,
 }
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let mut from = String::new();
+
+    let mut from = args.from.unwrap_or_else(|| {
+        let mut from = String::new();
+        print!("From: ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut from)
+    });
     let mut reply_to = String::new();
     let mut to = String::new();
     let mut subject = String::new();
     let mut body = String::new();
 
     // Gather user info
-    print!("From: ");
-    io::stdout().flush().unwrap();
-    io::stdin().read_line(&mut from)?;
     print!("Reply To: ");
     io::stdout().flush().unwrap();
     io::stdin().read_line(&mut reply_to)?;
