@@ -75,6 +75,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .subject(subject)
         .body(body)?;
 
+    #[cfg(debug_assertions)]
     dbg!(&email);
 
     // Build email
@@ -97,6 +98,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     } else {
         SmtpTransport::builder_dangerous(sender_mx).build()
     };
+    #[cfg(debug_assertions)]
     dbg!(&sender);
 
     // Send the email via remote relay
