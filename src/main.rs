@@ -17,6 +17,8 @@ struct Args {
     subject: Option<String>,
     #[arg(short, long)]
     body: Option<String>,
+    #[arg(short, long)]
+    encrypted: Option<bool>,
 }
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -73,10 +75,29 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .subject(subject)
         .body(body)?;
 
+    dbg!(&email);
+
+    // Build email
+    let encrypt = args.encrypted.unwrap_or_else(|| {
+        let mut encrypt = String::new();
+        print!("Encrypt (Y/n): ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut encrypt).unwrap();
+        let encrypt = encrypt.trim().to_string();
+        match encrypt.as_str() {
+            "n" | "N" => false,
+            _ => true,
+        }
+    });
+
     // Create TLS transport on port 25
     println!("Building email...");
-    let sender = SmtpTransport::builder_dangerous(sender_mx).build();
-    //dbg!(&sender);
+    let sender = if encrypt {
+        SmtpTransport::relay(sender_mx.as_str())?.build()
+    } else {
+        SmtpTransport::builder_dangerous(sender_mx).build()
+    };
+    dbg!(&sender);
 
     // Send the email via remote relay
     println!("Sending email...");
