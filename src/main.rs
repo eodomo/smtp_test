@@ -33,10 +33,15 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     });
     let mut reply_to = args.reply_to.unwrap_or_else(|| {
         let mut reply_to = String::new();
-        print!("Reply To: ");
+        print!("Reply To ({from}): ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut reply_to).unwrap();
-        reply_to.trim().to_string()
+        reply_to = reply_to.trim().to_string();
+        if reply_to == "" {
+            from.clone()
+        } else {
+            reply_to
+        }
     });
     let mut to = args.to.unwrap_or_else(|| {
         let mut to = String::new();
