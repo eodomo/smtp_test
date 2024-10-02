@@ -42,3 +42,14 @@ pub fn create_email(
 
     Ok(email)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn arrow_brackets() {
+        let email_address = "sample@text.com";
+        assert_eq!(add_arrow_brackets(email_address), "<sample@text.com>");
+    }
+}
