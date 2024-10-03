@@ -52,4 +52,15 @@ mod tests {
         let email_address = "sample@text.com";
         assert_eq!(add_arrow_brackets(email_address), "<sample@text.com>");
     }
+
+    #[test]
+    fn create_email() -> Result<(), Box<dyn std::error::Error>> {
+        let from = "test@example.com";
+        let reply_to = "test@example.com";
+        let to = "test@example.com";
+        let subject = "Subject text";
+        let body = "Body text";
+        super::create_email(from, reply_to, to, subject, body)?;
+        Ok(())
+    }
 }
