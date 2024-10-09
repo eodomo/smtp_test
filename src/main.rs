@@ -1,6 +1,6 @@
 use clap::Parser;
 use email_address_parser::EmailAddress;
-use lettre::{Message, SmtpTransport, Transport};
+use lettre::{transport::smtp::client::TlsParameters, Message, SmtpTransport, Transport};
 use smtp_test::*;
 use std::{io, io::Write};
 
@@ -99,11 +99,12 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Create TLS transport on port 25
     println!("Building email...");
     let sender = if encrypt {
+        let tls = lettre::transport::smtp::client::TlsParameters::builder(sender_mx.as_str().into())
+            .dangerous_accept_invalid_certs(true)
+            .build()?;
         SmtpTransport::relay(sender_mx.as_str())?
             .port(25)
-            .tls(lettre::transport::smtp::client::Tls::Required(
-                lettre::transport::smtp::client::TlsParameters::new(sender_mx.as_str().into())?.dangerous_accept_invalid_certs(true)
-            ))
+            .tls(lettre::transport::smtp::client::Tls::Required(tls))
             .build()
     } else {
         SmtpTransport::builder_dangerous(sender_mx).build()
