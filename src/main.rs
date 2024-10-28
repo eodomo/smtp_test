@@ -2,7 +2,7 @@ use clap::Parser;
 use email_address_parser::EmailAddress;
 use lettre::{
     transport::smtp::client::{Tls, TlsParameters},
-    Message, SmtpTransport, Transport,
+    SmtpTransport, Transport,
 };
 use smtp_test::*;
 use std::{io, io::Write};
@@ -27,14 +27,14 @@ struct Args {
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    let mut from = args.from.unwrap_or_else(|| {
+    let from = args.from.unwrap_or_else(|| {
         let mut from = String::new();
         print!("From: ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut from).unwrap();
         from.trim().to_string()
     });
-    let mut reply_to = args.reply_to.unwrap_or_else(|| {
+    let reply_to = args.reply_to.unwrap_or_else(|| {
         let mut reply_to = String::new();
         print!("Reply To ({from}): ");
         io::stdout().flush().unwrap();
@@ -46,7 +46,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             reply_to
         }
     });
-    let mut to = args.to.unwrap_or_else(|| {
+    let to = args.to.unwrap_or_else(|| {
         let mut to = String::new();
         print!("To: ");
         io::stdout().flush().unwrap();
@@ -72,16 +72,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let sender_domain = sender_email_address.get_domain();
     let sender_mx = get_mx_address(sender_domain).unwrap().to_utf8();
 
-    from = add_arrow_brackets(&from);
-    reply_to = add_arrow_brackets(&reply_to);
-    to = add_arrow_brackets(&to);
-
-    let email = Message::builder()
-        .from(from.parse()?)
-        .reply_to(reply_to.parse()?)
-        .to(to.parse()?)
-        .subject(subject)
-        .body(body)?;
+    let email = create_email(&from, &reply_to, &to, &subject, &body).unwrap();
 
     #[cfg(debug_assertions)]
     dbg!(&email);
