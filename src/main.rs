@@ -86,7 +86,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     dbg!(&email);
 
-    // Build email
     let encrypt = args.encrypted.unwrap_or_else(|| {
         let mut encrypt = String::new();
         print!("Encrypt (Y/n): ");
@@ -99,6 +98,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         }
     });
 
+    // Build email
     // Create TLS transport on port 25
     println!("Building email...");
     let sender = if encrypt {
