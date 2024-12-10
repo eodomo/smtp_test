@@ -22,6 +22,8 @@ struct Args {
     body: Option<String>,
     #[arg(short, long)]
     encrypted: Option<bool>,
+    #[arg(short, long)]
+    port: Option<u16>,
 }
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -66,6 +68,17 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut body).unwrap();
         body.trim().to_string()
+    });
+    let port: u16 = args.port.unwrap_or_else(|| {
+        let mut port_str = String::new();
+        let mut port: u16 = 25;     // Default port is 25
+        print!("Port (25): ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut port_str).unwrap();
+        if !port_str.is_empty() {
+            port = port_str.trim().parse::<u16>().unwrap();
+        }
+        port
     });
 
     let sender_email_address = EmailAddress::parse(&from.trim(), None).unwrap();
